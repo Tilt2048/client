@@ -2,8 +2,16 @@ function createNewData(row) {
   return new Array(row).fill(null).map(() => new Array());
 }
 
-export function moveTiles(board, direction, size, setBoard, setDirection) {
+export function moveTiles(
+  board,
+  direction,
+  size,
+  setBoard,
+  setDirection,
+  createNew2Tile,
+) {
   let tiles = JSON.parse(JSON.stringify(board));
+
   switch (direction) {
     case "left": {
       const newData = createNewData(size);
@@ -106,5 +114,8 @@ export function moveTiles(board, direction, size, setBoard, setDirection) {
     }
   }
   setBoard(tiles);
+  if (createNew2Tile) {
+    createNew2Tile(tiles);
+  }
   setDirection("");
 }

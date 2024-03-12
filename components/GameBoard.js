@@ -3,7 +3,6 @@ import { View, Text, Animated, StyleSheet } from "react-native";
 
 const BOARD_SIZE = 400;
 const TILE_MARGIN = 5;
-
 const calculateTileSize = (boardLength) => {
   return (BOARD_SIZE - TILE_MARGIN * (boardLength + 2)) / boardLength;
 };

@@ -10,9 +10,8 @@ export default function HomeScreen({ navigation }) {
   const [direction, setDirection] = useState("");
 
   useEffect(() => {
-    const TILT_THRESHOLD = 0.5;
     startGame();
-
+    const TILT_THRESHOLD = 0.5;
     Accelerometer.setUpdateInterval(1000);
 
     const subscription = Accelerometer.addListener(({ x, y }) => {
@@ -28,6 +27,7 @@ export default function HomeScreen({ navigation }) {
           : y > 0
             ? "up"
             : "down";
+
       setDirection(newDirection);
     });
 
@@ -46,6 +46,7 @@ export default function HomeScreen({ navigation }) {
     setBoardSize((currentSize) => {
       let newSize = currentSize + change;
       newSize = Math.max(3, Math.min(5, newSize));
+
       return newSize;
     });
   }
@@ -75,6 +76,10 @@ export default function HomeScreen({ navigation }) {
     }
   }
 
+  function handleBoardSize() {
+    navigation.navigate("Game", { boardSize: boardSize });
+  }
+
   return (
     <View style={styles.container}>
       <Text style={styles.title1}>Shake & Tilt</Text>
@@ -94,10 +99,7 @@ export default function HomeScreen({ navigation }) {
       <TouchableOpacity style={styles.button}>
         <Text style={styles.buttonText}>로그인</Text>
       </TouchableOpacity>
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => navigation.navigate("Game")}
-      >
+      <TouchableOpacity style={styles.button} onPress={() => handleBoardSize()}>
         <Text style={styles.buttonText}>게스트로 시작</Text>
       </TouchableOpacity>
     </View>
