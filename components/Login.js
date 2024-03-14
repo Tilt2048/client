@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
-import { StyleSheet, Text, TouchableOpacity } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, Button, View } from "react-native";
 import * as WebBrowser from "expo-web-browser";
 import * as Google from "expo-auth-session/providers/google";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useNavigation } from "@react-navigation/native";
 
 WebBrowser.maybeCompleteAuthSession();
 
-export default function Login() {
+export default function Login({ boardSize }) {
+  const navigation = useNavigation();
   const [token, setToken] = useState("");
   const [userInfo, setUserInfo] = useState(null);
 
@@ -29,6 +31,7 @@ export default function Login() {
       if (response?.type === "success") {
         // setToken(response.authentication.accessToken);
         getUserInfo(response.authentication.accessToken);
+        navigation.navigate("Nickname", { boardSize: boardSize });
       }
     } else {
       setUserInfo(user);
@@ -68,13 +71,19 @@ export default function Login() {
   }
 
   return (
-    <TouchableOpacity
-      disabled={!request}
-      style={styles.button}
-      onPress={() => promptAsync()}
-    >
-      <Text style={styles.buttonText}>로그인</Text>
-    </TouchableOpacity>
+    <View>
+      <TouchableOpacity
+        disabled={!request}
+        style={styles.button}
+        onPress={() => promptAsync()}
+      >
+        <Text style={styles.buttonText}>로그인</Text>
+      </TouchableOpacity>
+      <Button
+        title="remove local store"
+        onPress={async () => await AsyncStorage.removeItem("@user")}
+      />
+    </View>
   );
 }
 

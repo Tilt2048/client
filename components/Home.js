@@ -97,7 +97,7 @@ export default function HomeScreen({ navigation }) {
           <Text style={styles.arrowText}>&gt;</Text>
         </TouchableOpacity>
       </View>
-      <Login />
+      <Login boardSize={boardSize} />
       <TouchableOpacity
         style={styles.button}
         onPress={() => handleGameStartOnPress()}

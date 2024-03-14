@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { View, Text } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { Accelerometer } from "expo-sensors";
 import GameBoard from "./GameBoard.js";
 import { moveTiles } from "../src/moveTiles.js";
 
-export default function GameScreen({ route }) {
+export default function GameScreen({ route, navigation }) {
   const [board, setBoard] = useState([]);
-  const { boardSize } = route.params;
+  const { nickname, boardSize } = route.params;
   const [direction, setDirection] = useState("");
 
   useEffect(() => {
@@ -78,10 +78,24 @@ export default function GameScreen({ route }) {
     }
   }
 
+  function handleGoHome() {
+    navigation.navigate("Home");
+  }
+
   return (
     <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+      <TouchableOpacity onPress={() => handleGoHome(1)}>
+        <Text style={styles.homeIcon}>Home</Text>
+      </TouchableOpacity>
+      <Text style={styles.homeIcon}>{nickname}</Text>
       <Text>Score:</Text>
       <GameBoard board={board} />
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  homeIcon: {
+    fontSize: 20,
+  },
+});
