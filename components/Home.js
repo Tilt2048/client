@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Accelerometer } from "expo-sensors";
 import GameBoard from "./GameBoard.js";
+import Login from "./Login.js";
 import { moveTiles } from "../src/moveTiles.js";
 
 export default function HomeScreen({ navigation }) {
@@ -76,7 +77,7 @@ export default function HomeScreen({ navigation }) {
     }
   }
 
-  function handleBoardSize() {
+  function handleGameStartOnPress() {
     navigation.navigate("Game", { boardSize: boardSize });
   }
 
@@ -96,10 +97,11 @@ export default function HomeScreen({ navigation }) {
           <Text style={styles.arrowText}>&gt;</Text>
         </TouchableOpacity>
       </View>
-      <TouchableOpacity style={styles.button}>
-        <Text style={styles.buttonText}>로그인</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.button} onPress={() => handleBoardSize()}>
+      <Login />
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => handleGameStartOnPress()}
+      >
         <Text style={styles.buttonText}>게스트로 시작</Text>
       </TouchableOpacity>
     </View>
@@ -116,7 +118,6 @@ const styles = StyleSheet.create({
   title1: {
     fontSize: 40,
     fontWeight: "bold",
-    marginTop: -40,
   },
   title2: {
     fontSize: 50,
