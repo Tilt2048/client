@@ -1,121 +1,137 @@
-function createNewData(row) {
-  return new Array(row).fill(null).map(() => new Array());
+const getUndefinedCells = (board) => {
+  const undefinedCells = [];
+
+  board.forEach((row, i) => {
+    row.forEach((cell, j) => {
+      if (!cell) {
+        undefinedCells.push({ positionY: i, positionX: j });
+      }
+    });
+  });
+
+  return undefinedCells;
+};
+
+export const createRandomTile = (board) => {
+  const undefinedCells = getUndefinedCells(board);
+  const randomPosition = Math.floor(Math.random() * undefinedCells.length);
+  const twoOrFour = Math.random() < 0.5 ? 4 : 2;
+  const newTile = undefinedCells[randomPosition];
+
+  board[newTile.positionY][newTile.positionX] = {
+    ...newTile,
+    value: twoOrFour,
+    id: Date.now(),
+  };
+
+  return board;
+};
+
+export function createGameBoard(size) {
+  return new Array(size).fill(null).map(() => new Array(size).fill(undefined));
 }
 
-export function moveTiles(
-  board,
-  direction,
-  size,
-  setBoard,
-  setDirection,
-  createNew2Tile,
-) {
-  let tiles = JSON.parse(JSON.stringify(board));
+const rotateMatrix = (board) => {
+  return board[0].map((val, index) => board.map((row) => row[index]));
+};
 
-  switch (direction) {
-    case "left": {
-      const newData = createNewData(size);
+const arrangeBoard = (board) => {
+  const newBoard = createGameBoard(4);
 
-      board.forEach((rowData, i) => {
-        rowData.forEach((cellData, j) => {
-          if (cellData) {
-            const currentRow = newData[i];
-            const prevData = currentRow[currentRow.length - 1];
-            if (prevData === cellData) {
-              currentRow[currentRow.length - 1] *= -2;
-            } else {
-              newData[i].push(cellData);
-            }
-          }
-        });
-      });
+  board.forEach((row, rowIndex) =>
+    row.forEach((cell, cellIndex) => {
+      if (cell) {
+        newBoard[cell.positionY][cell.positionX] = cell;
+      }
+    }),
+  );
 
-      [...board].forEach((rowData, i) => {
-        [...board].forEach((cellData, j) => {
-          tiles[i][j] = Math.abs(newData[i][j]) || 0;
-        });
-      });
-      break;
+  return newBoard;
+};
+
+export const moveTiles = (board, direction, homeBoard) => {
+  let hasChanged = false;
+  let newScore = 0;
+  const newBoard =
+    direction === "left" || direction === "right"
+      ? [...board]
+      : rotateMatrix(board);
+  const axis =
+    direction === "left" || direction === "right" ? "positionX" : "positionY";
+
+  newBoard.forEach((row, rowIndex) => {
+    const filteredAndCombinedArr = combineAndFilterTiles(row, direction);
+    const undefinedArr = new Array(4 - filteredAndCombinedArr.length).fill(
+      undefined,
+    );
+
+    if (direction === "left" || direction === "up") {
+      newBoard[rowIndex] = filteredAndCombinedArr.concat(undefinedArr);
+    } else {
+      newBoard[rowIndex] = undefinedArr.concat(filteredAndCombinedArr);
     }
+    newBoard[rowIndex].forEach((cell, cellIndex) => {
+      if (cell) {
+        hasChanged = cell[axis] !== cellIndex ? true : hasChanged;
+        cell[axis] = cellIndex;
+      }
+    });
+  });
 
-    case "right": {
-      const newData = createNewData(size);
+  const arrangedBoard = arrangeBoard(newBoard);
+  // if (isOnCheckGameOverMode) return newScore;
+  let boardWithNewTile;
 
-      board.forEach((rowData, i) => {
-        rowData.forEach((cellData, j) => {
-          if (rowData[board.length - 1 - j]) {
-            const currentRow = newData[i];
-            const prevData = currentRow[currentRow.length - 1];
-            if (prevData === rowData[board.length - 1 - j]) {
-              currentRow[currentRow.length - 1] *= -2;
-            } else {
-              newData[i].push(rowData[board.length - 1 - j]);
-            }
-          }
-        });
-      });
-
-      [...board].forEach((rowData, i) => {
-        [...board].forEach((cellData, j) => {
-          tiles[i][board.length - 1 - j] = Math.abs(newData[i][j]) || 0;
-        });
-      });
-      break;
-    }
-
-    case "up": {
-      const newData = createNewData(size);
-
-      board.forEach((rowData, i) => {
-        rowData.forEach((cellData, j) => {
-          if (cellData) {
-            const currentRow = newData[j];
-            const prevData = currentRow[currentRow.length - 1];
-            if (prevData === cellData) {
-              currentRow[currentRow.length - 1] *= -2;
-            } else {
-              newData[j].push(cellData);
-            }
-          }
-        });
-      });
-
-      [...board].forEach((cellData, i) => {
-        [...board].forEach((rowData, j) => {
-          tiles[j][i] = Math.abs(newData[i][j]) || 0;
-        });
-      });
-      break;
-    }
-
-    case "down": {
-      const newData = createNewData(size);
-
-      board.forEach((rowData, i) => {
-        rowData.forEach((cellData, j) => {
-          if (board[board.length - 1 - i][j]) {
-            const currentRow = newData[j];
-            const prevData = currentRow[currentRow.length - 1];
-            if (prevData === board[board.length - 1 - i][j]) {
-              currentRow[currentRow.length - 1] *= -2;
-            } else {
-              newData[j].push(board[board.length - 1 - i][j]);
-            }
-          }
-        });
-      });
-
-      [...board].forEach((cellData, i) => {
-        [...board].forEach((rowData, j) => {
-          tiles[board.length - 1 - j][i] = Math.abs(newData[i][j]) || 0;
-        });
-      });
-      break;
-    }
+  if (!homeBoard) {
+    boardWithNewTile =
+      hasChanged || newScore > 0
+        ? createRandomTile(arrangedBoard)
+        : arrangedBoard;
+  } else {
+    boardWithNewTile = arrangeBoard;
   }
-  setBoard(tiles);
-  if (createNew2Tile) {
-    createNew2Tile(tiles);
+
+  return { newBoard: boardWithNewTile, newScore };
+
+  function combineAndFilterTiles(row, direction) {
+    // 오른쪽 또는 아래로 이동하는 경우 배열을 역순으로 처리
+    let reverseProcessing = direction === "right" || direction === "down";
+    let filteredRow = row.filter((x) => x !== undefined);
+
+    // 이동 방향에 따라 배열 순서를 조정
+    if (reverseProcessing) {
+      filteredRow.reverse();
+    }
+
+    for (let i = 0; i < filteredRow.length - 1; i++) {
+      if (filteredRow[i]?.value === filteredRow[i + 1]?.value) {
+        newScore += filteredRow[i].value * 2;
+        filteredRow[i] = {
+          ...filteredRow[i],
+          value: filteredRow[i].value * 2,
+        };
+        filteredRow[i + 1] = undefined;
+        i++;
+      }
+    }
+
+    filteredRow = filteredRow.filter((x) => x !== undefined);
+
+    if (reverseProcessing) {
+      filteredRow.reverse();
+    }
+
+    return filteredRow;
   }
-  setDirection("");
-}
+};
+
+// export const isGameOver = (board) => {
+//   const undefinedCells = getUndefinedCells(board);
+//   if (undefinedCells.length > 0) return false;
+
+//   for (const direction in directions) {
+//     const newScore = moveTiles(board, directions[direction], true);
+//     if (newScore > 0) return false;
+//   }
+//   return true;
+// };

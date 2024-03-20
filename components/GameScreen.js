@@ -1,18 +1,30 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { Accelerometer } from "expo-sensors";
-import GameBoard from "./GameBoard.js";
-import { moveTiles } from "../src/moveTiles.js";
+import Tile from "./GameBoard.js";
+import {
+  createRandomTile,
+  createGameBoard,
+  isGameOver,
+  moveTiles,
+} from "../src/moveTiles.js";
+
+const getTilesArr = (board) => {
+  return [].concat(...board);
+};
 
 export default function GameScreen({ route, navigation }) {
   const [board, setBoard] = useState([]);
-  const { nickname, boardSize } = route.params;
+  const [score, setScore] = useState(0);
+  const [maxScore, setMaxScore] = useState(0);
+  const { nickname, tileSize } = route.params;
   const [direction, setDirection] = useState("");
 
   useEffect(() => {
     startGame();
     const TILT_THRESHOLD = 0.5;
     Accelerometer.setUpdateInterval(1000);
+
     const subscription = Accelerometer.addListener(({ x, y }) => {
       if (Math.abs(x) < TILT_THRESHOLD && Math.abs(y) < TILT_THRESHOLD) {
         return;
@@ -37,45 +49,17 @@ export default function GameScreen({ route, navigation }) {
 
   useEffect(() => {
     if (direction) {
-      moveTiles(
-        board,
-        direction,
-        boardSize,
-        setBoard,
-        setDirection,
-        createNew2Tile,
-      );
+      const { newBoard } = moveTiles(board, direction);
+      setBoard(newBoard);
+      setDirection("");
     }
   }, [direction]);
 
-  function createGameBoard(size) {
-    return new Array(size).fill(null).map(() => new Array(size).fill(0));
-  }
-
   function startGame() {
-    const initialBoard = createGameBoard(boardSize);
-
-    setBoard(initialBoard);
-    createNew2Tile(initialBoard);
-  }
-
-  function createNew2Tile(currentBoard) {
-    const emptyCells = [];
-
-    currentBoard.forEach((row, rowIndex) =>
-      row.forEach((cell, cellIndex) => {
-        if (cell === 0) emptyCells.push({ rowIndex, cellIndex });
-      }),
-    );
-
-    if (emptyCells.length) {
-      const randomCellIndex = Math.floor(Math.random() * emptyCells.length);
-      const { rowIndex, cellIndex } = emptyCells[randomCellIndex];
-      const newBoard = [...currentBoard];
-
-      newBoard[rowIndex][cellIndex] = 2;
-      setBoard(newBoard);
-    }
+    let newBoard = createGameBoard(4);
+    newBoard = [...createRandomTile(newBoard)];
+    setScore(0);
+    setBoard(newBoard);
   }
 
   function handleGoHome() {
@@ -89,7 +73,14 @@ export default function GameScreen({ route, navigation }) {
       </TouchableOpacity>
       <Text style={styles.homeIcon}>{nickname}</Text>
       <Text>Score:</Text>
-      <GameBoard board={board} />
+      <View style={styles.board}>
+        {new Array(16).fill().map((cell, index) => (
+          <View key={index} style={styles.cell}></View>
+        ))}
+        {getTilesArr(board).map((cell, index) =>
+          cell ? <Tile key={cell.id} cell={cell} tileSize={tileSize} /> : null,
+        )}
+      </View>
     </View>
   );
 }
@@ -97,5 +88,24 @@ export default function GameScreen({ route, navigation }) {
 const styles = StyleSheet.create({
   homeIcon: {
     fontSize: 20,
+  },
+  board: {
+    position: "relative",
+    height: 365,
+    width: 365,
+    backgroundColor: "#bbada0",
+    flexWrap: "wrap",
+    borderWidth: 2,
+    borderColor: "#bbada0",
+  },
+  cell: {
+    width: 90,
+    height: 90,
+    backgroundColor: "#cdc1b4",
+    borderColor: "#bbada0",
+    borderWidth: 4,
+    borderRadius: 10,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

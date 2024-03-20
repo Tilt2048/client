@@ -1,14 +1,26 @@
 import { useState, useEffect } from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Accelerometer } from "expo-sensors";
-import GameBoard from "./GameBoard.js";
+import Tile from "./GameBoard.js";
 import Login from "./Login.js";
 import { moveTiles } from "../src/moveTiles.js";
 
+const BOARD_SIZE = 400;
+const TILE_MARGIN = 5;
+const calculateTileSize = (boardLength) => {
+  return (BOARD_SIZE - TILE_MARGIN * boardLength * 2) / boardLength;
+};
+
 export default function HomeScreen({ navigation }) {
   const [board, setBoard] = useState([]);
+  const [initialTiles, setInitialTiles] = useState([]);
   const [boardSize, setBoardSize] = useState(4);
   const [direction, setDirection] = useState("");
+  const homeBoard = true;
+
+  const getTilesArr = (board) => {
+    return [].concat(...board);
+  };
 
   useEffect(() => {
     startGame();
@@ -39,7 +51,9 @@ export default function HomeScreen({ navigation }) {
 
   useEffect(() => {
     if (direction) {
-      moveTiles(board, direction, boardSize, setBoard, setDirection);
+      const { newBoard } = moveTiles(board, direction, homeBoard);
+      setBoard(newBoard);
+      setDirection("");
     }
   }, [direction]);
 
@@ -55,24 +69,86 @@ export default function HomeScreen({ navigation }) {
   function startGame() {
     if (boardSize === 4) {
       setBoard([
-        [16, 32, 64, 128],
-        [8, 0, 0, 256],
-        [4, 0, 0, 512],
-        [2, 0, 2048, 1024],
+        [
+          { id: 1710919311204, positionX: 0, positionY: 0, value: 16 },
+          { id: 1710919911205, positionX: 1, positionY: 0, value: 32 },
+          { id: 1710919911206, positionX: 2, positionY: 0, value: 64 },
+          { id: 1710919911207, positionX: 3, positionY: 0, value: 128 },
+        ],
+        [
+          { id: 1710919911208, positionX: 0, positionY: 1, value: 8 },
+          undefined,
+          undefined,
+          { id: 1710919911209, positionX: 3, positionY: 1, value: 256 },
+        ],
+        [
+          { id: 1710919911200, positionX: 0, positionY: 2, value: 4 },
+          undefined,
+          undefined,
+          { id: 1710919911201, positionX: 3, positionY: 2, value: 512 },
+        ],
+        [
+          { id: 1710919911202, positionX: 0, positionY: 3, value: 2 },
+          undefined,
+          { id: 1710919911203, positionX: 2, positionY: 3, value: 2048 },
+          { id: 1710919911277, positionX: 3, positionY: 3, value: 1024 },
+        ],
       ]);
     } else if (boardSize === 5) {
       setBoard([
-        [32, 64, 128, 256, 512],
-        [16, 0, 0, 0, 1024],
-        [8, 0, 0, 0, 2048],
-        [4, 0, 0, 0, 0],
-        [2, 0, 0, 0, 0],
+        [
+          { id: 1710919911200, positionX: 0, positionY: 0, value: 32 },
+          { id: 1710919911201, positionX: 1, positionY: 0, value: 64 },
+          { id: 1710919911202, positionX: 2, positionY: 0, value: 128 },
+          { id: 1710919911203, positionX: 3, positionY: 0, value: 256 },
+          { id: 1710919911204, positionX: 4, positionY: 0, value: 512 },
+        ],
+        [
+          { id: 1710919911205, positionX: 0, positionY: 1, value: 16 },
+          undefined,
+          undefined,
+          undefined,
+          { id: 1710919911206, positionX: 4, positionY: 1, value: 1024 },
+        ],
+        [
+          { id: 1710919911207, positionX: 0, positionY: 2, value: 8 },
+          undefined,
+          undefined,
+          undefined,
+          { id: 1710919911208, positionX: 4, positionY: 2, value: 2048 },
+        ],
+        [
+          { id: 1710919911209, positionX: 0, positionY: 3, value: 4 },
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+        ],
+        [
+          { id: 1710919911210, positionX: 0, positionY: 4, value: 2 },
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+        ],
       ]);
     } else if (boardSize === 3) {
       setBoard([
-        [8, 16, 32],
-        [4, 0, 64],
-        [2, 0, 0],
+        [
+          { id: 1710919911202, positionX: 0, positionY: 0, value: 8 },
+          { id: 1710919911203, positionX: 1, positionY: 0, value: 16 },
+          { id: 1710919911204, positionX: 2, positionY: 0, value: 32 },
+        ],
+        [
+          { id: 1710919911205, positionX: 0, positionY: 1, value: 4 },
+          undefined,
+          { id: 1710919911206, positionX: 2, positionY: 0, value: 64 },
+        ],
+        [
+          { id: 1710919911207, positionX: 0, positionY: 2, value: 2 },
+          undefined,
+          undefined,
+        ],
       ]);
     }
   }
@@ -85,7 +161,14 @@ export default function HomeScreen({ navigation }) {
     <View style={styles.container}>
       <Text style={styles.title1}>Shake & Tilt</Text>
       <Text style={styles.title2}>2048</Text>
-      <GameBoard board={board} />
+      <View style={styles.board}>
+        {new Array(boardSize * boardSize).fill().map((cell, index) => (
+          <View key={index} style={styles.cell}></View>
+        ))}
+        {getTilesArr(board).map((cell, index) =>
+          cell ? <Tile key={cell.id} cell={cell} /> : null,
+        )}
+      </View>
       <View style={styles.boardSizeSelector}>
         <TouchableOpacity onPress={() => changeBoardSize(-1)}>
           <Text style={styles.arrowText}>&lt;</Text>
@@ -151,5 +234,24 @@ const styles = StyleSheet.create({
   buttonText: {
     color: "#ffffff",
     fontSize: 40,
+  },
+  board: {
+    position: "relative",
+    height: 365,
+    width: 365,
+    backgroundColor: "#bbada0",
+    flexWrap: "wrap",
+    borderWidth: 2,
+    borderColor: "#bbada0",
+  },
+  cell: {
+    width: 90,
+    height: 90,
+    backgroundColor: "#cdc1b4",
+    borderColor: "#bbada0",
+    borderWidth: 4,
+    borderRadius: 10,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
