@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, Button } from "react-native";
 import { Accelerometer } from "expo-sensors";
 import Tile from "./GameBoard.js";
 import Login from "./Login.js";
@@ -13,10 +13,11 @@ const calculateTileSize = (boardLength) => {
 
 export default function HomeScreen({ navigation }) {
   const [board, setBoard] = useState([]);
-  const [initialTiles, setInitialTiles] = useState([]);
   const [boardSize, setBoardSize] = useState(4);
   const [direction, setDirection] = useState("");
   const homeBoard = true;
+  const [data, setData] = useState({ x: 0, y: 0, z: 0 });
+  const [zeroPoint, setZeroPoint] = useState({ x: 0, y: 0, z: 0 });
 
   const getTilesArr = (board) => {
     return [].concat(...board);
@@ -24,30 +25,45 @@ export default function HomeScreen({ navigation }) {
 
   useEffect(() => {
     startGame();
-    const TILT_THRESHOLD = 0.5;
-    Accelerometer.setUpdateInterval(1000);
-
-    const subscription = Accelerometer.addListener(({ x, y }) => {
-      if (Math.abs(x) < TILT_THRESHOLD && Math.abs(y) < TILT_THRESHOLD) {
-        return;
-      }
-
-      const newDirection =
-        Math.abs(x) > Math.abs(y)
-          ? x > 0
-            ? "right"
-            : "left"
-          : y > 0
-            ? "up"
-            : "down";
-
-      setDirection(newDirection);
+    const subscription = Accelerometer.addListener((accelerometerData) => {
+      setData(accelerometerData);
     });
+    Accelerometer.setUpdateInterval(500);
 
-    return () => {
-      subscription.remove();
-    };
+    return () => subscription.remove();
   }, [boardSize]);
+
+  useEffect(() => {
+    const TILT_THRESHOLD = 0.25;
+    Accelerometer.setUpdateInterval(800);
+
+    const adjustedData = {
+      x: data.x - zeroPoint.x,
+      y: data.y - zeroPoint.y,
+    };
+
+    if (
+      Math.abs(adjustedData.x) < TILT_THRESHOLD &&
+      Math.abs(adjustedData.y) < TILT_THRESHOLD
+    ) {
+      return;
+    }
+
+    const newDirection =
+      Math.abs(adjustedData.x) > Math.abs(adjustedData.y)
+        ? adjustedData.x > 0
+          ? "right"
+          : "left"
+        : adjustedData.y > 0
+          ? "up"
+          : "down";
+
+    setDirection(newDirection);
+  }, [data, zeroPoint]);
+
+  const setAsZeroPoint = () => {
+    setZeroPoint(data);
+  };
 
   useEffect(() => {
     if (direction) {
@@ -161,6 +177,7 @@ export default function HomeScreen({ navigation }) {
     <View style={styles.container}>
       <Text style={styles.title1}>Shake & Tilt</Text>
       <Text style={styles.title2}>2048</Text>
+      <Button onPress={setAsZeroPoint} title="Set Current State as Zero" />
       <View style={styles.board}>
         {new Array(boardSize * boardSize).fill().map((cell, index) => (
           <View key={index} style={styles.cell}></View>
