@@ -1,11 +1,14 @@
 import React, { useState } from "react";
 import { View, TextInput, Button, Text, StyleSheet } from "react-native";
+import { useGameState } from "./GameStateContext";
 
 export default function Nickname({ route, navigation }) {
   const [nickname, setNickname] = useState("");
   const { boardSize } = route.params;
+  const { updateGameState } = useGameState();
 
   const handleSaveNickname = () => {
+    updateGameState({ nickname: nickname });
     navigation.navigate("Game", { nickname: nickname, boardSize: boardSize });
     console.log("Saved Nickname: ", nickname);
   };

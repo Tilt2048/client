@@ -4,6 +4,7 @@ import * as WebBrowser from "expo-web-browser";
 import * as Google from "expo-auth-session/providers/google";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
+import { useGameState } from "./GameStateContext";
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -11,6 +12,7 @@ export default function Login({ boardSize }) {
   const navigation = useNavigation();
   const [token, setToken] = useState("");
   const [userInfo, setUserInfo] = useState(null);
+  const { updateGameState } = useGameState();
 
   const [request, response, promptAsync] = Google.useAuthRequest({
     androidClientId: "",
@@ -65,6 +67,7 @@ export default function Login({ boardSize }) {
       const user = await response.json();
       await AsyncStorage.setItem("@user", JSON.stringify(user));
       setUserInfo(user);
+      updateGameState({ userId: user.id });
     } catch (error) {
       console.error(error);
     }
