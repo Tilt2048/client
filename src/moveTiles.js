@@ -52,6 +52,7 @@ const arrangeBoard = (board) => {
 export const moveTiles = (board, direction, homeBoard) => {
   let hasChanged = false;
   let newScore = 0;
+  const preBoard = board;
   const newBoard =
     direction === "left" || direction === "right"
       ? [...board]
@@ -91,7 +92,7 @@ export const moveTiles = (board, direction, homeBoard) => {
     boardWithNewTile = arrangeBoard;
   }
 
-  return { newBoard: boardWithNewTile, newScore };
+  return { newBoard: boardWithNewTile, newScore, preBoard };
 
   function combineAndFilterTiles(row, direction) {
     // 오른쪽 또는 아래로 이동하는 경우 배열을 역순으로 처리

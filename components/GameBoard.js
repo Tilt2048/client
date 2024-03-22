@@ -19,7 +19,7 @@ export default function Tile({ cell, tileSize }) {
         x: cell.positionX * 90,
         y: cell.positionY * 90,
       },
-      duration: 80,
+      duration: 100,
       useNativeDriver: true,
     }).start();
   }, [cell.positionX, cell.positionY]);

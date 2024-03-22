@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Button } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, Modal } from "react-native";
 import { Accelerometer } from "expo-sensors";
 import Tile from "./GameBoard.js";
 import Login from "./Login.js";
@@ -18,6 +18,9 @@ export default function HomeScreen({ navigation }) {
   const homeBoard = true;
   const [data, setData] = useState({ x: 0, y: 0, z: 0 });
   const [zeroPoint, setZeroPoint] = useState({ x: 0, y: 0, z: 0 });
+  const [adjustedData, setAdjustedData] = useState({ x: 0, y: 0, z: 0 });
+  const [tiltSetting, setTiltSetting] = useState(false);
+  const [isModalVisible, setIsModalVisible] = useState(false);
 
   const getTilesArr = (board) => {
     return [].concat(...board);
@@ -35,12 +38,12 @@ export default function HomeScreen({ navigation }) {
 
   useEffect(() => {
     const TILT_THRESHOLD = 0.25;
-    Accelerometer.setUpdateInterval(800);
+    // Accelerometer.setUpdateInterval(500);
 
-    const adjustedData = {
+    setAdjustedData({
       x: data.x - zeroPoint.x,
       y: data.y - zeroPoint.y,
-    };
+    });
 
     if (
       Math.abs(adjustedData.x) < TILT_THRESHOLD &&
@@ -173,11 +176,20 @@ export default function HomeScreen({ navigation }) {
     navigation.navigate("Game", { boardSize: boardSize });
   }
 
+  const handleSetStandardSlope = () => {
+    setIsModalVisible(!isModalVisible);
+    setTiltSetting(!tiltSetting);
+  };
+  const setStandardSlopeDone = () => {
+    setAsZeroPoint();
+    setIsModalVisible(false);
+    setTiltSetting(false);
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.title1}>Shake & Tilt</Text>
       <Text style={styles.title2}>2048</Text>
-      <Button onPress={setAsZeroPoint} title="Set Current State as Zero" />
       <View style={styles.board}>
         {new Array(boardSize * boardSize).fill().map((cell, index) => (
           <View key={index} style={styles.cell}></View>
@@ -204,6 +216,23 @@ export default function HomeScreen({ navigation }) {
       >
         <Text style={styles.buttonText}>게스트로 시작</Text>
       </TouchableOpacity>
+      <TouchableOpacity style={styles.button} onPress={handleSetStandardSlope}>
+        <Text style={styles.buttonText}>기울기 설정</Text>
+      </TouchableOpacity>
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={isModalVisible}
+        onRequestClose={handleSetStandardSlope}
+      >
+        <View style={styles.modalView}>
+          <Text style={styles.modalText}>X: {adjustedData.x.toFixed(2)}</Text>
+          <Text style={styles.modalText}>Y: {adjustedData.y.toFixed(2)}</Text>
+          <TouchableOpacity onPress={setStandardSlopeDone}>
+            <Text style={styles.settingDone}>세팅 완료</Text>
+          </TouchableOpacity>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -222,7 +251,6 @@ const styles = StyleSheet.create({
   title2: {
     fontSize: 50,
     fontWeight: "bold",
-    marginBottom: 40,
   },
   boardSizeSelector: {
     flexDirection: "row",
@@ -259,6 +287,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#bbada0",
     flexWrap: "wrap",
     borderWidth: 2,
+    borderRadius: 5,
     borderColor: "#bbada0",
   },
   cell: {
@@ -270,5 +299,29 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     justifyContent: "center",
     alignItems: "center",
+  },
+  modalView: {
+    marginTop: 400,
+    backgroundColor: "#FFC3A0",
+    borderRadius: 20,
+    padding: 35,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 20,
+    },
+    shadowOpacity: 0.5,
+    shadowRadius: 10,
+    elevation: 5,
+  },
+  modalText: {
+    marginBottom: 40,
+    textAlign: "center",
+    fontSize: 40,
+    color: "white",
+  },
+  settingDone: {
+    fontSize: 30,
   },
 });

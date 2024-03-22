@@ -8,8 +8,7 @@ import {
   Modal,
 } from "react-native";
 import { Accelerometer } from "expo-sensors";
-import { FontAwesome } from "@expo/vector-icons";
-import { FontAwesome6 } from "@expo/vector-icons";
+import { FontAwesome, FontAwesome6 } from "@expo/vector-icons";
 import Tile from "./GameBoard.js";
 import {
   createRandomTile,
@@ -17,6 +16,7 @@ import {
   isGameOver,
   moveTiles,
 } from "../src/moveTiles.js";
+import { useGameState } from "./GameStateContext";
 
 const getTilesArr = (board) => {
   return [].concat(...board);
@@ -28,15 +28,16 @@ export default function GameScreen({ route, navigation }) {
   const [maxScore, setMaxScore] = useState(0);
   const { nickname, tileSize } = route.params;
   const [direction, setDirection] = useState("");
-  const [prevBoard, setPrevBoard] = useState([null]);
+  const [prevBoards, setPrevBoards] = useState([null]);
   const [newScore, setNewScore] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const { updateGameState } = useGameState();
 
   useEffect(() => {
     startGame();
     const TILT_THRESHOLD = 0.5;
-    Accelerometer.setUpdateInterval(600);
+    Accelerometer.setUpdateInterval(800);
 
     const subscription = Accelerometer.addListener(({ x, y }) => {
       if (Math.abs(x) < TILT_THRESHOLD && Math.abs(y) < TILT_THRESHOLD) {
@@ -62,22 +63,34 @@ export default function GameScreen({ route, navigation }) {
 
   useEffect(() => {
     if (!isPaused && direction) {
-      if (!prevBoard) {
-        setPrevBoard([...board]);
+      const { newBoard, newScore, preBoard } = moveTiles(board, direction);
+      if (JSON.stringify(preBoard) !== JSON.stringify(newBoard)) {
+        console.log(preBoard);
+        // 보드가 실제로 변경되었는지 확인
+        setPrevBoards([...prevBoards, preBoard]); // 현재 보드 상태를 이전 상태들 배열에 추가합니다.
+        setBoard(newBoard);
+        setScore(score + newScore);
+        updateGameState({ board: newBoard, score: score + newScore });
+        setDirection("");
       }
-      const { newBoard, newScore } = moveTiles(board, direction);
-      setScore((prevScore) => prevScore + newScore);
-      setBoard(newBoard);
-      setDirection("");
     }
   }, [direction]);
+
+  const undoMove = () => {
+    if (prevBoards.length > 0) {
+      const lastBoard = prevBoards.pop();
+      console.log(lastBoard);
+      setBoard(lastBoard);
+      setPrevBoards([...prevBoards]);
+    }
+  };
 
   function startGame() {
     let newBoard = createGameBoard(4);
     newBoard = [...createRandomTile(newBoard)];
     setScore(0);
     setBoard(newBoard);
-    setPrevBoard([]);
+    setPrevBoards([]);
   }
 
   function handleGoHome() {
@@ -127,6 +140,9 @@ export default function GameScreen({ route, navigation }) {
           cell ? <Tile key={cell.id} cell={cell} tileSize={tileSize} /> : null,
         )}
       </View>
+      <TouchableOpacity onPress={undoMove}>
+        <Text>Undo</Text>
+      </TouchableOpacity>
     </View>
   );
 }
