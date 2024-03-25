@@ -95,11 +95,9 @@ export const moveTiles = (board, direction, homeBoard) => {
   return { newBoard: boardWithNewTile, newScore, preBoard };
 
   function combineAndFilterTiles(row, direction) {
-    // 오른쪽 또는 아래로 이동하는 경우 배열을 역순으로 처리
     let reverseProcessing = direction === "right" || direction === "down";
     let filteredRow = row.filter((x) => x !== undefined);
 
-    // 이동 방향에 따라 배열 순서를 조정
     if (reverseProcessing) {
       filteredRow.reverse();
     }

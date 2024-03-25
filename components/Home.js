@@ -1,6 +1,14 @@
 import { useState, useEffect } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Modal } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Modal,
+  Alert,
+} from "react-native";
 import { Accelerometer } from "expo-sensors";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import Tile from "./GameBoard.js";
 import Login from "./Login.js";
 import { moveTiles } from "../src/moveTiles.js";
@@ -20,7 +28,8 @@ export default function HomeScreen({ navigation }) {
   const [zeroPoint, setZeroPoint] = useState({ x: 0, y: 0, z: 0 });
   const [adjustedData, setAdjustedData] = useState({ x: 0, y: 0, z: 0 });
   const [tiltSetting, setTiltSetting] = useState(false);
-  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isTiltModalVisible, setIsTiltModalVisible] = useState(false);
+  const [isStartModalVisible, setIsStartModalVisible] = useState(true);
 
   const getTilesArr = (board) => {
     return [].concat(...board);
@@ -38,7 +47,6 @@ export default function HomeScreen({ navigation }) {
 
   useEffect(() => {
     const TILT_THRESHOLD = 0.25;
-    // Accelerometer.setUpdateInterval(500);
 
     setAdjustedData({
       x: data.x - zeroPoint.x,
@@ -67,6 +75,12 @@ export default function HomeScreen({ navigation }) {
   const setAsZeroPoint = () => {
     setZeroPoint(data);
   };
+
+  useEffect(() => {
+    if (Math.abs(data.x) > 0.2 || Math.abs(data.y) > 0.2) {
+      setIsStartModalVisible(false);
+    }
+  }, [data]);
 
   useEffect(() => {
     if (direction) {
@@ -177,12 +191,12 @@ export default function HomeScreen({ navigation }) {
   }
 
   const handleSetStandardSlope = () => {
-    setIsModalVisible(!isModalVisible);
+    setIsTiltModalVisible(!isTiltModalVisible);
     setTiltSetting(!tiltSetting);
   };
   const setStandardSlopeDone = () => {
     setAsZeroPoint();
-    setIsModalVisible(false);
+    setIsTiltModalVisible(false);
     setTiltSetting(false);
   };
 
@@ -222,7 +236,7 @@ export default function HomeScreen({ navigation }) {
       <Modal
         animationType="fade"
         transparent={true}
-        visible={isModalVisible}
+        visible={isTiltModalVisible}
         onRequestClose={handleSetStandardSlope}
       >
         <View style={styles.modalView}>

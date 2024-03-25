@@ -8,6 +8,8 @@ import {
   Modal,
 } from "react-native";
 import { Accelerometer } from "expo-sensors";
+import { PanGestureHandler, State } from "react-native-gesture-handler";
+
 import { FontAwesome, FontAwesome6 } from "@expo/vector-icons";
 import Tile from "./GameBoard.js";
 import {
@@ -33,6 +35,7 @@ export default function GameScreen({ route, navigation }) {
   const [isPaused, setIsPaused] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const { updateGameState } = useGameState();
+  const [inputMode, setInputMode] = useState("swipe");
 
   useEffect(() => {
     startGame();
@@ -61,13 +64,31 @@ export default function GameScreen({ route, navigation }) {
     };
   }, []);
 
+  const onSwipe = (event) => {
+    if (
+      event.nativeEvent.state !== State.ACTIVE ||
+      isPaused ||
+      inputMode !== "swipe"
+    )
+      return;
+
+    const { velocityX, velocityY } = event.nativeEvent;
+    let detectedDirection = "";
+
+    if (Math.abs(velocityX) > Math.abs(velocityY)) {
+      detectedDirection = velocityX > 0 ? "right" : "left";
+    } else {
+      detectedDirection = velocityY > 0 ? "down" : "up";
+    }
+
+    setDirection(detectedDirection);
+  };
+
   useEffect(() => {
     if (!isPaused && direction) {
       const { newBoard, newScore, preBoard } = moveTiles(board, direction);
       if (JSON.stringify(preBoard) !== JSON.stringify(newBoard)) {
-        console.log(preBoard);
-        // 보드가 실제로 변경되었는지 확인
-        setPrevBoards([...prevBoards, preBoard]); // 현재 보드 상태를 이전 상태들 배열에 추가합니다.
+        setPrevBoards([...prevBoards, preBoard]);
         setBoard(newBoard);
         setScore(score + newScore);
         updateGameState({ board: newBoard, score: score + newScore });
@@ -79,7 +100,6 @@ export default function GameScreen({ route, navigation }) {
   const undoMove = () => {
     if (prevBoards.length > 0) {
       const lastBoard = prevBoards.pop();
-      console.log(lastBoard);
       setBoard(lastBoard);
       setPrevBoards([...prevBoards]);
     }
@@ -94,7 +114,7 @@ export default function GameScreen({ route, navigation }) {
   }
 
   function handleGoHome() {
-    navigation.navigate("Home");
+    navigation.push("Home");
   }
 
   const togglePause = () => {
@@ -106,44 +126,55 @@ export default function GameScreen({ route, navigation }) {
     setIsPaused(false);
   };
 
+  const resetGame = () => {
+    startGame();
+  };
+
   return (
-    <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-      <TouchableOpacity onPress={() => handleGoHome(1)}>
-        <FontAwesome name="home" color="black" style={styles.homeIcon} />
-      </TouchableOpacity>
-      <TouchableOpacity onPress={togglePause}>
-        <FontAwesome6 name="pause" color="black" style={styles.pause} />
-      </TouchableOpacity>
-      <Modal
-        animationType="fade"
-        transparent={true}
-        visible={isModalVisible}
-        onRequestClose={togglePause}
-      >
-        <View style={styles.modalView}>
-          <Text style={styles.modalText}>Game Paused</Text>
-          <TouchableOpacity title="Resume" onPress={resumeGame}>
-            <Text style={styles.resume}>Resume</Text>
-          </TouchableOpacity>
+    <PanGestureHandler onGestureEvent={onSwipe}>
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <TouchableOpacity onPress={() => handleGoHome(1)}>
+          <FontAwesome name="home" color="black" style={styles.homeIcon} />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={togglePause}>
+          <FontAwesome6 name="pause" color="black" style={styles.pause} />
+        </TouchableOpacity>
+        <Modal
+          animationType="fade"
+          transparent={true}
+          visible={isModalVisible}
+          onRequestClose={togglePause}
+        >
+          <View style={styles.modalView}>
+            <Text style={styles.modalText}>Game Paused</Text>
+            <TouchableOpacity title="Resume" onPress={resumeGame}>
+              <Text style={styles.resume}>Resume</Text>
+            </TouchableOpacity>
+          </View>
+        </Modal>
+        <TouchableOpacity>
+          <Text style={styles.nickname}>{nickname}</Text>
+        </TouchableOpacity>
+        <Text style={styles.twoZeroFourEight}>2048</Text>
+        <Text style={styles.score}>{`Score: ${score}`}</Text>
+        <View style={styles.board}>
+          {new Array(16).fill().map((cell, index) => (
+            <View key={index} style={styles.cell}></View>
+          ))}
+          {getTilesArr(board).map((cell, index) =>
+            cell ? (
+              <Tile key={cell.id} cell={cell} tileSize={tileSize} />
+            ) : null,
+          )}
         </View>
-      </Modal>
-      <TouchableOpacity>
-        <Text style={styles.homeIcon}>{nickname}</Text>
-      </TouchableOpacity>
-      <Text style={styles.twoZeroFourEight}>2048</Text>
-      <Text style={styles.score}>{`Score: ${score}`}</Text>
-      <View style={styles.board}>
-        {new Array(16).fill().map((cell, index) => (
-          <View key={index} style={styles.cell}></View>
-        ))}
-        {getTilesArr(board).map((cell, index) =>
-          cell ? <Tile key={cell.id} cell={cell} tileSize={tileSize} /> : null,
-        )}
+        <TouchableOpacity onPress={undoMove}>
+          <Text>Undo</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={resetGame}>
+          <Text>Reset</Text>
+        </TouchableOpacity>
       </View>
-      <TouchableOpacity onPress={undoMove}>
-        <Text>Undo</Text>
-      </TouchableOpacity>
-    </View>
+    </PanGestureHandler>
   );
 }
 
@@ -151,14 +182,14 @@ const styles = StyleSheet.create({
   homeIcon: {
     fontSize: 50,
     position: "absolute",
-    top: -180,
+    top: -150,
     left: -170,
     zIndex: 10,
   },
   pause: {
     fontSize: 50,
     position: "absolute",
-    top: -180,
+    top: -150,
     left: 130,
     zIndex: 10,
   },
@@ -187,7 +218,13 @@ const styles = StyleSheet.create({
     fontSize: 30,
   },
   twoZeroFourEight: {
-    fontSize: 40,
+    fontSize: 60,
+    fontWeight: "bold",
+    top: -120,
+  },
+  nickname: {
+    fontSize: 30,
+    top: -40,
   },
   score: {
     fontSize: 40,

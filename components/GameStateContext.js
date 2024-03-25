@@ -1,4 +1,6 @@
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState, useEffect } from "react";
+import { AppState } from "react-native";
+import axios from "axios";
 
 const GameStateContext = createContext();
 
@@ -12,17 +14,37 @@ export const GameStateProvider = ({ children }) => {
     score: 0,
   });
 
+  const [appState, setAppState] = useState(AppState.currentState);
+
+  useEffect(() => {
+    const subscription = AppState.addEventListener("change", (nextAppState) => {
+      if (appState.match(/inactive|background/) && nextAppState === "active") {
+      } else if (nextAppState === "background") {
+        saveGameStateToDB();
+      }
+
+      setAppState(nextAppState);
+    });
+
+    return () => {
+      subscription.remove();
+    };
+  }, [appState]);
+
   const saveGameStateToDB = async () => {
-    // 여기에 DB에 저장하는 로직을 구현합니다.
-    // 예: axios.post('/api/save', gameState);
+    try {
+      const response = await axios.post(
+        "http://192.168.0.45:8000/api/gameState",
+        gameState,
+      );
+    } catch (error) {
+      console.error("Error saving game state:", error);
+    }
   };
 
-  // 게임 상태 업데이트 함수
   const updateGameState = (newState) => {
     setGameState((prev) => ({ ...prev, ...newState }));
   };
-
-  console.log(gameState);
 
   return (
     <GameStateContext.Provider
