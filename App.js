@@ -1,7 +1,7 @@
 import React from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
-import { GameStateProvider } from "./components/GameStateContext.js"; // 여기에 GameStateContext를 import 합니다.
+import { GameStateProvider } from "./components/GameStateContext.js";
 import HomeScreen from "./components/Home.js";
 import GameScreen from "./components/GameScreen.js";
 import Login from "./components/Login.js";

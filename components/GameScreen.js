@@ -38,13 +38,13 @@ export default function GameScreen({ route, navigation }) {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const { updateGameState, gameState } = useGameState();
   const [inputMode, setInputMode] = useState("swipe");
-  const [hasUser, setHasUser] = useState("false");
+  const [haveUser, setHaveUser] = useState("false");
 
   useEffect(() => {
     const TILT_THRESHOLD = 0.5;
-    Accelerometer.setUpdateInterval(800);
+    Accelerometer.setUpdateInterval(600);
 
-    const subscription = Accelerometer.addListener(({ x, y }) => {
+    const subscription = Accelerometer.addListener(({ x, y, z }) => {
       if (Math.abs(x) < TILT_THRESHOLD && Math.abs(y) < TILT_THRESHOLD) {
         return;
       }
@@ -68,11 +68,11 @@ export default function GameScreen({ route, navigation }) {
 
   useEffect(() => {
     const fetchGameState = async () => {
-      const userId = await AsyncStorage.getItem("@user");
+      const userId = await AsyncStorage.getItem("@userLoginInfo");
       if (userId) {
         try {
           const response = await axios.get(
-            `http://192.168.0.45:8000/api/gameState/${userId}`,
+            `http://192.168.0.45:8000/api/gameState/${userId.id}`,
           );
           if (response.data) {
             const { board, score } = response.data;
@@ -93,19 +93,18 @@ export default function GameScreen({ route, navigation }) {
         }
       } else {
         const guestGameState = await AsyncStorage.getItem("@guestGameState");
-        if (guestGameState) {
+
+        if (JSON.parse(guestGameState).board.length) {
           const { board, score } = JSON.parse(guestGameState);
           setBoard(board);
           setScore(score);
-          setHasUser(false);
         } else {
           startGame();
-          setHasUser(true);
         }
       }
     };
     fetchGameState();
-  }, [hasUser]);
+  }, []);
 
   const onSwipe = (event) => {
     if (
@@ -267,7 +266,7 @@ const styles = StyleSheet.create({
   },
   nickname: {
     fontSize: 30,
-    top: -40,
+    top: 70,
   },
   score: {
     fontSize: 40,

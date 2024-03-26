@@ -42,7 +42,7 @@ export default function Login({ boardSize }) {
   }
 
   async function getLocalUser() {
-    const data = await AsyncStorage.getItem("@user");
+    const data = await AsyncStorage.getItem("@userLoginInfo");
 
     if (!data) {
       return null;
@@ -65,7 +65,7 @@ export default function Login({ boardSize }) {
       );
 
       const user = await response.json();
-      await AsyncStorage.setItem("@user", JSON.stringify(user));
+      await AsyncStorage.setItem("@userLoginInfo", JSON.stringify(user));
       setUserInfo(user);
       updateGameState({ userId: user.id });
       setIsLogin(true);
@@ -86,7 +86,7 @@ export default function Login({ boardSize }) {
       <Button
         title="remove local store"
         onPress={async () => {
-          await AsyncStorage.removeItem("@user");
+          await AsyncStorage.removeItem("@userLoginInfo");
           await AsyncStorage.removeItem("@guestGameState");
         }}
       />

@@ -50,7 +50,6 @@ const arrangeBoard = (board) => {
 };
 
 export const moveTiles = (board, direction, homeBoard) => {
-  // console.log("board", board);
   let hasChanged = false;
   let newScore = 0;
   const preBoard = board;

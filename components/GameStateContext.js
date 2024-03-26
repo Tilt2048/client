@@ -37,8 +37,8 @@ export const GameStateProvider = ({ children }) => {
   }, [appState]);
 
   const loadGameState = async () => {
-    const userId = await AsyncStorage.getItem("@userId");
-    let key = userId ? `@gameState_${userId}` : "@guestGameState";
+    const user = await AsyncStorage.getItem("@userLoginInfo");
+    let key = user ? `@gameState_${user.id}` : "@guestGameState";
     try {
       const storedGameState = await AsyncStorage.getItem(key);
       if (storedGameState) {

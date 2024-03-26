@@ -1,18 +1,10 @@
 import { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Modal,
-  Alert,
-} from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, Modal } from "react-native";
 import { Accelerometer } from "expo-sensors";
 import Tile from "./GameBoard.js";
 import Login from "./Login.js";
 import TiltAnimation from "./TiltAnimation.js";
 import { moveTiles } from "../src/moveTiles.js";
-import { useGameState } from "./GameStateContext";
 
 const BOARD_SIZE = 400;
 const TILE_MARGIN = 5;
@@ -43,13 +35,13 @@ export default function HomeScreen({ navigation }) {
       setData(accelerometerData);
 
       if (
-        Math.abs(accelerometerData.x) > 0.2 ||
-        Math.abs(accelerometerData.y) > 0.2
+        Math.abs(accelerometerData.x) > 0.4 ||
+        Math.abs(accelerometerData.y) > 0.4
       ) {
         setIsTilted(true);
       }
     });
-    Accelerometer.setUpdateInterval(800);
+    Accelerometer.setUpdateInterval(600);
 
     return () => subscription.remove();
   }, [boardSize]);

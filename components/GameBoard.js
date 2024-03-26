@@ -25,13 +25,13 @@ export default function Tile({ cell, tileSize }) {
   }, [cell.positionX, cell.positionY]);
 
   useEffect(() => {
-    setScaleAndOpacity(new Animated.Value(0.7));
+    setScaleAndOpacity(new Animated.Value(0));
   }, [cell.value]);
 
   useEffect(() => {
     Animated.timing(scaleAndOpacity, {
       toValue: 1,
-      duration: 60,
+      duration: 100,
       delay: 25,
       useNativeDriver: true,
     }).start();
