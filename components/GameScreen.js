@@ -8,6 +8,8 @@ import {
   Modal,
 } from "react-native";
 import { Accelerometer } from "expo-sensors";
+import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { PanGestureHandler, State } from "react-native-gesture-handler";
 
 import { FontAwesome, FontAwesome6 } from "@expo/vector-icons";
@@ -28,17 +30,17 @@ export default function GameScreen({ route, navigation }) {
   const [board, setBoard] = useState([]);
   const [score, setScore] = useState(0);
   const [maxScore, setMaxScore] = useState(0);
-  const { nickname, tileSize } = route.params;
+  const { tileSize } = route.params;
   const [direction, setDirection] = useState("");
   const [prevBoards, setPrevBoards] = useState([null]);
-  const [newScore, setNewScore] = useState(0);
+  const [nickname, setNickname] = useState("");
   const [isPaused, setIsPaused] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const { updateGameState } = useGameState();
+  const { updateGameState, gameState } = useGameState();
   const [inputMode, setInputMode] = useState("swipe");
+  const [hasUser, setHasUser] = useState("false");
 
   useEffect(() => {
-    startGame();
     const TILT_THRESHOLD = 0.5;
     Accelerometer.setUpdateInterval(800);
 
@@ -63,6 +65,47 @@ export default function GameScreen({ route, navigation }) {
       subscription.remove();
     };
   }, []);
+
+  useEffect(() => {
+    const fetchGameState = async () => {
+      const userId = await AsyncStorage.getItem("@user");
+      if (userId) {
+        try {
+          const response = await axios.get(
+            `http://192.168.0.45:8000/api/gameState/${userId}`,
+          );
+          if (response.data) {
+            const { board, score } = response.data;
+            setBoard(board);
+            setScore(score);
+            setNickname(gameState.nickname);
+          }
+        } catch (error) {
+          if (error.response && error.response.status === 404) {
+            console.log(
+              "No game state found on the server for the user, starting a new game.",
+            );
+            setNickname(gameState.nickname);
+            startGame();
+          } else {
+            console.error("Failed to fetch game state:", error);
+          }
+        }
+      } else {
+        const guestGameState = await AsyncStorage.getItem("@guestGameState");
+        if (guestGameState) {
+          const { board, score } = JSON.parse(guestGameState);
+          setBoard(board);
+          setScore(score);
+          setHasUser(false);
+        } else {
+          startGame();
+          setHasUser(true);
+        }
+      }
+    };
+    fetchGameState();
+  }, [hasUser]);
 
   const onSwipe = (event) => {
     if (

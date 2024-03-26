@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { AppState } from "react-native";
 import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const GameStateContext = createContext();
 
@@ -17,26 +18,49 @@ export const GameStateProvider = ({ children }) => {
   const [appState, setAppState] = useState(AppState.currentState);
 
   useEffect(() => {
-    const subscription = AppState.addEventListener("change", (nextAppState) => {
-      if (appState.match(/inactive|background/) && nextAppState === "active") {
-      } else if (nextAppState === "background") {
-        saveGameStateToDB();
-      }
+    const subscription = AppState.addEventListener(
+      "change",
+      async (nextAppState) => {
+        if (
+          appState.match(/inactive|background/) &&
+          nextAppState === "active"
+        ) {
+          await loadGameState();
+        } else if (nextAppState === "background") {
+          await saveGameState();
+        }
+        setAppState(nextAppState);
+      },
+    );
 
-      setAppState(nextAppState);
-    });
-
-    return () => {
-      subscription.remove();
-    };
+    return () => subscription.remove();
   }, [appState]);
 
-  const saveGameStateToDB = async () => {
+  const loadGameState = async () => {
+    const userId = await AsyncStorage.getItem("@userId");
+    let key = userId ? `@gameState_${userId}` : "@guestGameState";
     try {
-      const response = await axios.post(
-        "http://192.168.0.45:8000/api/gameState",
-        gameState,
-      );
+      const storedGameState = await AsyncStorage.getItem(key);
+      if (storedGameState) {
+        setGameState(JSON.parse(storedGameState));
+      }
+    } catch (error) {
+      console.error("Error loading game state:", error);
+    }
+  };
+
+  const saveGameState = async () => {
+    const { userId, board, score } = gameState;
+    let key = userId ? `@gameState_${userId}` : "@guestGameState";
+    try {
+      await AsyncStorage.setItem(key, JSON.stringify({ userId, board, score }));
+      if (userId) {
+        await axios.post("http://192.168.0.45:8000/api/gameState", {
+          userId,
+          board,
+          score,
+        });
+      }
     } catch (error) {
       console.error("Error saving game state:", error);
     }
@@ -48,7 +72,7 @@ export const GameStateProvider = ({ children }) => {
 
   return (
     <GameStateContext.Provider
-      value={{ gameState, updateGameState, saveGameStateToDB }}
+      value={{ gameState, updateGameState, saveGameState }}
     >
       {children}
     </GameStateContext.Provider>

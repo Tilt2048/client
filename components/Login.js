@@ -12,7 +12,8 @@ export default function Login({ boardSize }) {
   const navigation = useNavigation();
   const [token, setToken] = useState("");
   const [userInfo, setUserInfo] = useState(null);
-  const { updateGameState } = useGameState();
+  const [isLogin, setIsLogin] = useState(false);
+  const { updateGameState, gameState } = useGameState();
 
   const [request, response, promptAsync] = Google.useAuthRequest({
     androidClientId: "",
@@ -67,6 +68,7 @@ export default function Login({ boardSize }) {
       await AsyncStorage.setItem("@user", JSON.stringify(user));
       setUserInfo(user);
       updateGameState({ userId: user.id });
+      setIsLogin(true);
     } catch (error) {
       console.error(error);
     }
@@ -79,11 +81,14 @@ export default function Login({ boardSize }) {
         style={styles.button}
         onPress={() => promptAsync()}
       >
-        <Text style={styles.buttonText}>로그인</Text>
+        <Text style={styles.buttonText}>{isLogin ? "로그아웃" : "로그인"}</Text>
       </TouchableOpacity>
       <Button
         title="remove local store"
-        onPress={async () => await AsyncStorage.removeItem("@user")}
+        onPress={async () => {
+          await AsyncStorage.removeItem("@user");
+          await AsyncStorage.removeItem("@guestGameState");
+        }}
       />
     </View>
   );

@@ -50,6 +50,7 @@ const arrangeBoard = (board) => {
 };
 
 export const moveTiles = (board, direction, homeBoard) => {
+  // console.log("board", board);
   let hasChanged = false;
   let newScore = 0;
   const preBoard = board;
@@ -96,7 +97,7 @@ export const moveTiles = (board, direction, homeBoard) => {
 
   function combineAndFilterTiles(row, direction) {
     let reverseProcessing = direction === "right" || direction === "down";
-    let filteredRow = row.filter((x) => x !== undefined);
+    let filteredRow = row.filter((cell) => cell !== undefined && cell !== null);
 
     if (reverseProcessing) {
       filteredRow.reverse();

@@ -9,7 +9,7 @@ export default function Nickname({ route, navigation }) {
 
   const handleSaveNickname = () => {
     updateGameState({ nickname: nickname });
-    navigation.navigate("Game", { nickname: nickname, boardSize: boardSize });
+    navigation.navigate("Game", { boardSize: boardSize });
   };
 
   return (

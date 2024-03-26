@@ -8,10 +8,11 @@ import {
   Alert,
 } from "react-native";
 import { Accelerometer } from "expo-sensors";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import Tile from "./GameBoard.js";
 import Login from "./Login.js";
+import TiltAnimation from "./TiltAnimation.js";
 import { moveTiles } from "../src/moveTiles.js";
+import { useGameState } from "./GameStateContext";
 
 const BOARD_SIZE = 400;
 const TILE_MARGIN = 5;
@@ -30,6 +31,7 @@ export default function HomeScreen({ navigation }) {
   const [tiltSetting, setTiltSetting] = useState(false);
   const [isTiltModalVisible, setIsTiltModalVisible] = useState(false);
   const [isStartModalVisible, setIsStartModalVisible] = useState(true);
+  const [isTilted, setIsTilted] = useState(false);
 
   const getTilesArr = (board) => {
     return [].concat(...board);
@@ -39,8 +41,15 @@ export default function HomeScreen({ navigation }) {
     startGame();
     const subscription = Accelerometer.addListener((accelerometerData) => {
       setData(accelerometerData);
+
+      if (
+        Math.abs(accelerometerData.x) > 0.2 ||
+        Math.abs(accelerometerData.y) > 0.2
+      ) {
+        setIsTilted(true);
+      }
     });
-    Accelerometer.setUpdateInterval(500);
+    Accelerometer.setUpdateInterval(800);
 
     return () => subscription.remove();
   }, [boardSize]);
@@ -194,6 +203,7 @@ export default function HomeScreen({ navigation }) {
     setIsTiltModalVisible(!isTiltModalVisible);
     setTiltSetting(!tiltSetting);
   };
+
   const setStandardSlopeDone = () => {
     setAsZeroPoint();
     setIsTiltModalVisible(false);
@@ -202,7 +212,7 @@ export default function HomeScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title1}>Shake & Tilt</Text>
+      <Text style={styles.title1}>Tilt & Tilt</Text>
       <Text style={styles.title2}>2048</Text>
       <View style={styles.board}>
         {new Array(boardSize * boardSize).fill().map((cell, index) => (
@@ -212,7 +222,13 @@ export default function HomeScreen({ navigation }) {
           cell ? <Tile key={cell.id} cell={cell} /> : null,
         )}
       </View>
-      <View style={styles.boardSizeSelector}>
+      {!isTilted && (
+        <View style={styles.tiltPrompt}>
+          <Text style={styles.tiltMessage}>기기를 기울여 보세요!</Text>
+          <TiltAnimation />
+        </View>
+      )}
+      {/* <View style={styles.boardSizeSelector}>
         <TouchableOpacity onPress={() => changeBoardSize(-1)}>
           <Text style={styles.arrowText}>&lt;</Text>
         </TouchableOpacity>
@@ -222,7 +238,7 @@ export default function HomeScreen({ navigation }) {
         <TouchableOpacity onPress={() => changeBoardSize(1)}>
           <Text style={styles.arrowText}>&gt;</Text>
         </TouchableOpacity>
-      </View>
+      </View> */}
       <Login boardSize={boardSize} />
       <TouchableOpacity
         style={styles.button}
@@ -293,6 +309,16 @@ const styles = StyleSheet.create({
   buttonText: {
     color: "#ffffff",
     fontSize: 40,
+  },
+  tiltPrompt: {
+    position: "absolute",
+    justifyContent: "center",
+    alignItems: "center",
+    top: 300,
+  },
+  tiltMessage: {
+    fontSize: 30,
+    fontWeight: "bold",
   },
   board: {
     position: "relative",
