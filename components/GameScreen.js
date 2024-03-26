@@ -4,7 +4,7 @@ import {
   Text,
   TouchableOpacity,
   StyleSheet,
-  Button,
+  Alert,
   Modal,
 } from "react-native";
 import { Accelerometer } from "expo-sensors";
@@ -18,6 +18,7 @@ import {
   createRandomTile,
   createGameBoard,
   isGameOver,
+  hasWon,
   moveTiles,
 } from "../src/moveTiles.js";
 import { useGameState } from "./GameStateContext";
@@ -38,7 +39,8 @@ export default function GameScreen({ route, navigation }) {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const { updateGameState, gameState } = useGameState();
   const [inputMode, setInputMode] = useState("swipe");
-  const [haveUser, setHaveUser] = useState("false");
+  const [haveUser, setHaveUser] = useState(false);
+  const [isWon, setIsWon] = useState(false);
 
   useEffect(() => {
     const TILT_THRESHOLD = 0.5;
@@ -129,6 +131,16 @@ export default function GameScreen({ route, navigation }) {
   useEffect(() => {
     if (!isPaused && direction) {
       const { newBoard, newScore, preBoard } = moveTiles(board, direction);
+      const flattenTiles = newBoard.flat();
+      if (!isWon) {
+        flattenTiles.forEach((tile) => {
+          if (tile?.value === 2048) {
+            Alert.alert("You Won This Game");
+            setIsWon(true);
+          }
+        });
+      }
+
       if (JSON.stringify(preBoard) !== JSON.stringify(newBoard)) {
         setPrevBoards([...prevBoards, preBoard]);
         setBoard(newBoard);
@@ -150,6 +162,18 @@ export default function GameScreen({ route, navigation }) {
   function startGame() {
     let newBoard = createGameBoard(4);
     newBoard = [...createRandomTile(newBoard)];
+    // newBoard[0][0] = {
+    //   id: Date.now(),
+    //   positionX: 0,
+    //   positionY: 0,
+    //   value: 1024,
+    // };
+    // newBoard[0][1] = {
+    //   id: Date.now() + 1,
+    //   positionX: 1,
+    //   positionY: 0,
+    //   value: 1024,
+    // };
     setScore(0);
     setBoard(newBoard);
     setPrevBoards([]);

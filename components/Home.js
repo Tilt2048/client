@@ -216,7 +216,7 @@ export default function HomeScreen({ navigation }) {
       </View>
       {!isTilted && (
         <View style={styles.tiltPrompt}>
-          <Text style={styles.tiltMessage}>기기를 기울여 보세요!</Text>
+          <Text style={styles.tiltMessage}>기울여 보세요!</Text>
           <TiltAnimation />
         </View>
       )}

@@ -124,13 +124,23 @@ export const moveTiles = (board, direction, homeBoard) => {
   }
 };
 
-// export const isGameOver = (board) => {
-//   const undefinedCells = getUndefinedCells(board);
-//   if (undefinedCells.length > 0) return false;
+const directions = {
+  up: "up",
+  down: "down",
+  right: "right",
+  left: "left",
+};
+export const isGameOver = (board) => {
+  const undefinedCells = getUndefinedCells(board);
+  if (undefinedCells.length > 0) return false;
 
-//   for (const direction in directions) {
-//     const newScore = moveTiles(board, directions[direction], true);
-//     if (newScore > 0) return false;
-//   }
-//   return true;
-// };
+  for (const direction in directions) {
+    const newScore = moveTiles(board, directions[direction], true);
+    if (newScore > 0) return false;
+  }
+  return true;
+};
+
+export const hasWon = (board) => {
+  return board.some((row) => row.some((cell) => cell && cell.value === 2048));
+};

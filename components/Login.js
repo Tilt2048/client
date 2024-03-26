@@ -38,6 +38,9 @@ export default function Login({ boardSize }) {
     } else {
       setUserInfo(user);
       console.log("loaded locally");
+      if (isLogin) {
+        navigation.navigate("Game", { boardSize: boardSize });
+      }
     }
   }
 
@@ -86,8 +89,12 @@ export default function Login({ boardSize }) {
       <Button
         title="remove local store"
         onPress={async () => {
-          await AsyncStorage.removeItem("@userLoginInfo");
-          await AsyncStorage.removeItem("@guestGameState");
+          try {
+            await AsyncStorage.clear();
+            console.log("Storage successfully cleared!");
+          } catch (e) {
+            console.error("Failed to clear the async storage.", e);
+          }
         }}
       />
     </View>

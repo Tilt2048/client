@@ -51,11 +51,12 @@ export const GameStateProvider = ({ children }) => {
 
   const saveGameState = async () => {
     const { userId, board, score } = gameState;
+    console.log(gameState);
     let key = userId ? `@gameState_${userId}` : "@guestGameState";
     try {
       await AsyncStorage.setItem(key, JSON.stringify({ userId, board, score }));
       if (userId) {
-        await axios.post("http://192.168.0.45:8000/api/gameState", {
+        await axios.post("http://192.168.45.150:8000/api/gameState", {
           userId,
           board,
           score,

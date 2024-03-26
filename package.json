@@ -43,7 +43,8 @@
     "react-native-screens": "~3.29.0",
     "react-native-vector-icons": "^10.0.3",
     "react-native-web": "~0.19.6",
-    "undefined": "react-native-async-storage/async-storage"
+    "undefined": "react-native-async-storage/async-storage",
+    "expo-av": "~13.10.5"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
