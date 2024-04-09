@@ -14,7 +14,6 @@ const Tile = ({ value, size, moveInfo }) => {
   let tileAnim = useRef(new Animated.ValueXY(initialPos)).current;
 
   useEffect(() => {
-    // Animated.spring을 이용하여 타일을 최종 위치로 부드럽게 이동시킵니다.
     if (value !== 0 && moveInfo) {
       tileAnim = useRef(new Animated.ValueXY(moveInfo.from)).current;
       Animated.spring(tileAnim, {
@@ -28,11 +27,10 @@ const Tile = ({ value, size, moveInfo }) => {
     width: size,
     height: size,
     backgroundColor,
-    // position: "absolute",
     margin: TILE_MARGIN / 2,
     justifyContent: "center",
     alignItems: "center",
-    borderRadius: 5, // 기존 타일 스타일
+    borderRadius: 5,
     transform: tileAnim.getTranslateTransform(),
   };
 
@@ -48,17 +46,14 @@ const InitialTile = ({ size }) => {
     width: size,
     height: size,
     backgroundColor: "#cdc1b4",
-    // position: "absolute",
     margin: TILE_MARGIN / 2,
     justifyContent: "center",
     alignItems: "center",
-    borderRadius: 5, // 기존 타일 스타일
+    borderRadius: 5,
   };
 
   return <View style={tileStyle}></View>;
 };
-// 기본 타일들을 다깔아두고 위에 새로 움직이느 타일들을 겹쳐두는 방식. 값이 없는 놈들은 투명하게 만들기. getTileBackgroundColor함수에서 case1 보고 추후 수정
-// 먼가 움직이기는하는데 뭐가 움직이는 트리거인지 모름 찾아야함
 
 function getTileBackgroundColor(value) {
   switch (value) {
@@ -93,11 +88,6 @@ function getTileBackgroundColor(value) {
 
 const GameBoard = ({ board, moveInfo, initialTiles = [], startBoard }) => {
   const tileSize = calculateTileSize(board.length);
-
-  // if (!initialTiles) {
-  //   console.log("initialTiles is undefined");
-  //   return null; // 또는 적절한 대체 UI 렌더링
-  // }
 
   return (
     <View style={[styles.board, { width: BOARD_SIZE, height: BOARD_SIZE }]}>
@@ -140,12 +130,10 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 5,
     left: 5,
-    // margin: 5,
   },
   row: {
     flexDirection: "row",
     justifyContent: "space-around",
-    // position: "absolute",
     top: 0,
   },
   cell: {
