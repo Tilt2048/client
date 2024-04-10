@@ -74,7 +74,7 @@ export default function GameScreen({ route, navigation }) {
       if (userId) {
         try {
           const response = await axios.get(
-            `http://192.168.0.45:8000/api/gameState/${userId.id}`,
+            `http://192.168.45.150:8000/api/gameState/${userId.id}`,
           );
           if (response.data) {
             const { board, score } = response.data;
@@ -135,8 +135,22 @@ export default function GameScreen({ route, navigation }) {
       if (!isWon) {
         flattenTiles.forEach((tile) => {
           if (tile?.value === 2048) {
-            Alert.alert("You Won This Game");
             setIsWon(true);
+            Alert.alert(
+              "성공!!!",
+              "계속해서 플레이 하시겠습니까, 아니면 새 게임을 시작하시겠습니까?",
+              [
+                {
+                  text: "계속하기",
+                  onPress: () => console.log("게임 계속"),
+                },
+                {
+                  text: "새 게임",
+                  onPress: () => resetGame(),
+                },
+              ],
+              { cancelable: false },
+            );
           }
         });
       }
@@ -149,7 +163,7 @@ export default function GameScreen({ route, navigation }) {
         setDirection("");
       }
     }
-  }, [direction]);
+  }, [direction, isWon]);
 
   const undoMove = () => {
     if (prevBoards.length > 0) {
@@ -197,7 +211,7 @@ export default function GameScreen({ route, navigation }) {
   };
 
   return (
-    <PanGestureHandler onGestureEvent={onSwipe}>
+    <PanGestureHandler>
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
         <TouchableOpacity onPress={() => handleGoHome(1)}>
           <FontAwesome name="home" color="black" style={styles.homeIcon} />
@@ -233,11 +247,11 @@ export default function GameScreen({ route, navigation }) {
             ) : null,
           )}
         </View>
-        <TouchableOpacity onPress={undoMove}>
+        {/* <TouchableOpacity onPress={undoMove}>
           <Text>Undo</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
         <TouchableOpacity onPress={resetGame}>
-          <Text>Reset</Text>
+          <Text style={styles.reset}>Reset</Text>
         </TouchableOpacity>
       </View>
     </PanGestureHandler>
@@ -314,5 +328,9 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     justifyContent: "center",
     alignItems: "center",
+  },
+  reset: {
+    fontSize: 20,
+    top: 20,
   },
 });
