@@ -9,8 +9,8 @@ describe("Tile 컴포넌트 테스트", () => {
       positionY: 0,
       value: 2,
     };
-    const tileSize = 90;
 
+    const tileSize = 90;
     const { getByText } = render(<Tile cell={cell} tileSize={tileSize} />);
 
     expect(getByText("2")).toBeTruthy();
