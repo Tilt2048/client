@@ -5,6 +5,7 @@ import * as Google from "expo-auth-session/providers/google";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
 import { useGameState } from "./GameStateContext";
+import { IOS_CLIENT, WEB_CLIENT } from "@env";
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -17,10 +18,8 @@ export default function Login({ boardSize }) {
 
   const [request, response, promptAsync] = Google.useAuthRequest({
     androidClientId: "",
-    iosClientId:
-      "432674420028-ivc44isbiv4so3ooc5fffg5t8kn478lr.apps.googleusercontent.com",
-    webClientId:
-      "432674420028-u1ltrhiqt69jbmodieehnapfhltoqs7r.apps.googleusercontent.com",
+    iosClientId: IOS_CLIENT,
+    webClientId: WEB_CLIENT,
   });
 
   useEffect(() => {
