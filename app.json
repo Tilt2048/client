@@ -14,7 +14,7 @@
     "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.gmltmd519.tilt2048"
+      "bundleIdentifier": "com.gmltmd519.2048"
     },
     "android": {
       "adaptiveIcon": {

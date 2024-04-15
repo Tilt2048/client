@@ -31,4 +31,7 @@ module.exports = {
       version: "detect",
     },
   },
+  globals: {
+    act: "readonly",
+  },
 };

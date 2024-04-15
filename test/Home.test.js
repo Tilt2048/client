@@ -1,5 +1,6 @@
 import React from "react";
 import { render, fireEvent } from "@testing-library/react-native";
+import { act } from "@testing-library/react-native";
 import HomeScreen from "../components/Home.js";
 import { NavigationContainer } from "@react-navigation/native";
 
