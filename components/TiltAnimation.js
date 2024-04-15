@@ -3,12 +3,10 @@ import { View, Animated, StyleSheet, Easing } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
 
 export default function TiltAnimation() {
-  // X축과 Y축을 위한 애니메이션 값 생성
   const tiltXAnimation = useRef(new Animated.Value(0)).current;
   const tiltYAnimation = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    // X축 기울기 애니메이션
     const tiltX = Animated.sequence([
       Animated.timing(tiltXAnimation, {
         toValue: 1,
@@ -30,7 +28,6 @@ export default function TiltAnimation() {
       }),
     ]);
 
-    // Y축 기울기 애니메이션
     const tiltY = Animated.sequence([
       Animated.timing(tiltYAnimation, {
         toValue: 1,
@@ -52,16 +49,9 @@ export default function TiltAnimation() {
       }),
     ]);
 
-    // 무한 반복 애니메이션
-    Animated.loop(
-      Animated.sequence([
-        tiltX, // 먼저 X축 기울기
-        tiltY, // 다음 Y축 기울기
-      ]),
-    ).start();
+    Animated.loop(Animated.sequence([tiltX, tiltY])).start();
   }, [tiltXAnimation, tiltYAnimation]);
 
-  // 로테이션 값 계산
   const rotationX = tiltXAnimation.interpolate({
     inputRange: [-1, 1],
     outputRange: ["-30deg", "30deg"],
@@ -75,10 +65,7 @@ export default function TiltAnimation() {
     <View style={styles.container}>
       <Animated.View
         style={{
-          transform: [
-            { rotateX: rotationX }, // X축 기울기 적용
-            { rotateY: rotationY }, // Y축 기울기 적용
-          ],
+          transform: [{ rotateX: rotationX }, { rotateY: rotationY }],
         }}
       >
         <Icon name="mobile" size={100} color="#000" />

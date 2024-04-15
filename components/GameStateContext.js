@@ -51,8 +51,8 @@ export const GameStateProvider = ({ children }) => {
 
   const saveGameState = async () => {
     const { userId, board, score } = gameState;
-    console.log(gameState);
     let key = userId ? `@gameState_${userId}` : "@guestGameState";
+
     try {
       await AsyncStorage.setItem(key, JSON.stringify({ userId, board, score }));
       if (userId) {

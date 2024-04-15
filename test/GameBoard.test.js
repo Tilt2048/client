@@ -1,6 +1,6 @@
 import React from "react";
 import { render, fireEvent, act } from "@testing-library/react-native";
-import Tile from "./Tile";
+import Tile from "../components/GameBoard.js";
 
 describe("Tile 컴포넌트 테스트", () => {
   it("Tile 컴포넌트가 올바르게 렌더링 되는지 확인", () => {
