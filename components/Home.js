@@ -188,7 +188,7 @@ export default function HomeScreen({ navigation }) {
   }
 
   function handleGameStartOnPress() {
-    navigation.navigate("Game", { boardSize: boardSize });
+    navigation.navigate("Game", { boardSize: boardSize, isGameStarted: true });
   }
 
   const handleSetStandardSlope = () => {

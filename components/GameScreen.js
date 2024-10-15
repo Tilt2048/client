@@ -28,6 +28,7 @@ const getTilesArr = (board) => {
 };
 
 export default function GameScreen({ route, navigation }) {
+  const [isGameStarted, setIsGameStarted] = useState(false);
   const [board, setBoard] = useState([]);
   const [score, setScore] = useState(0);
   const [maxScore, setMaxScore] = useState(0);
@@ -41,6 +42,13 @@ export default function GameScreen({ route, navigation }) {
   const [inputMode, setInputMode] = useState("swipe");
   const [haveUser, setHaveUser] = useState(false);
   const [isWon, setIsWon] = useState(false);
+
+  useEffect(() => {
+    if (route.params.isGameStarted) {
+      console.log(route.params.isGameStarted + "a");
+      setIsGameStarted(true);
+    }
+  }, [route.params.isGameStarted]);
 
   useEffect(() => {
     const TILT_THRESHOLD = 0.5;
@@ -105,6 +113,7 @@ export default function GameScreen({ route, navigation }) {
         }
       }
     };
+
     fetchGameState();
   }, []);
 
@@ -129,7 +138,7 @@ export default function GameScreen({ route, navigation }) {
   };
 
   useEffect(() => {
-    if (!isPaused && direction) {
+    if (!isPaused && direction && isGameStarted) {
       const { newBoard, newScore, preBoard } = moveTiles(board, direction);
       const flattenTiles = newBoard.flat();
       if (!isWon) {
@@ -194,6 +203,9 @@ export default function GameScreen({ route, navigation }) {
   }
 
   function handleGoHome() {
+    setIsGameStarted(false);
+    console.log("Game stopped, going to Home");
+    route.params.isGameStarted = false;
     navigation.push("Home");
   }
 
