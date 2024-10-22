@@ -85,7 +85,7 @@ export default function Login({ boardSize }) {
       >
         <Text style={styles.buttonText}>{isLogin ? "로그아웃" : "로그인"}</Text>
       </TouchableOpacity>
-      <Button
+      {/* <Button
         title="remove local store"
         onPress={async () => {
           try {
@@ -95,7 +95,7 @@ export default function Login({ boardSize }) {
             console.error("Failed to clear the async storage.", e);
           }
         }}
-      />
+      /> */}
     </View>
   );
 }
