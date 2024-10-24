@@ -16,6 +16,7 @@ export const GameStateProvider = ({ children }) => {
   });
 
   const [appState, setAppState] = useState(AppState.currentState);
+  const [isBackground, setIsBackground] = useState(false);
 
   useEffect(() => {
     const subscription = AppState.addEventListener(
@@ -25,8 +26,10 @@ export const GameStateProvider = ({ children }) => {
           appState.match(/inactive|background/) &&
           nextAppState === "active"
         ) {
+          setIsBackground(false);
           await loadGameState();
         } else if (nextAppState === "background") {
+          setIsBackground(true);
           await saveGameState();
         }
         setAppState(nextAppState);
@@ -73,7 +76,7 @@ export const GameStateProvider = ({ children }) => {
 
   return (
     <GameStateContext.Provider
-      value={{ gameState, updateGameState, saveGameState }}
+      value={{ gameState, updateGameState, saveGameState, isBackground }}
     >
       {children}
     </GameStateContext.Provider>

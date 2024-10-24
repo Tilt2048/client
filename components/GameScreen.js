@@ -38,14 +38,13 @@ export default function GameScreen({ route, navigation }) {
   const [nickname, setNickname] = useState("");
   const [isPaused, setIsPaused] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const { updateGameState, gameState } = useGameState();
+  const { updateGameState, gameState, isBackground } = useGameState();
   const [inputMode, setInputMode] = useState("swipe");
   const [haveUser, setHaveUser] = useState(false);
   const [isWon, setIsWon] = useState(false);
 
   useEffect(() => {
     if (route.params.isGameStarted) {
-      console.log(route.params.isGameStarted + "a");
       setIsGameStarted(true);
     }
   }, [route.params.isGameStarted]);
@@ -55,6 +54,10 @@ export default function GameScreen({ route, navigation }) {
     Accelerometer.setUpdateInterval(600);
 
     const subscription = Accelerometer.addListener(({ x, y, z }) => {
+      if (isPaused || isBackground) {
+        return;
+      }
+
       if (Math.abs(x) < TILT_THRESHOLD && Math.abs(y) < TILT_THRESHOLD) {
         return;
       }
@@ -67,7 +70,6 @@ export default function GameScreen({ route, navigation }) {
           : y > 0
             ? "up"
             : "down";
-      if (isPaused) return;
       setDirection(newDirection);
     });
 
@@ -138,7 +140,7 @@ export default function GameScreen({ route, navigation }) {
   };
 
   useEffect(() => {
-    if (!isPaused && direction && isGameStarted) {
+    if (!isPaused && direction && isGameStarted && !isBackground) {
       const { newBoard, newScore, preBoard } = moveTiles(board, direction);
       const flattenTiles = newBoard.flat();
       if (!isWon) {
@@ -204,7 +206,6 @@ export default function GameScreen({ route, navigation }) {
 
   function handleGoHome() {
     setIsGameStarted(false);
-    console.log("Game stopped, going to Home");
     route.params.isGameStarted = false;
     navigation.push("Home");
   }
