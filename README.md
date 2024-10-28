@@ -7,7 +7,7 @@
   Tilt&Tilt 2048은 기존에 화면을 스와이프 하여 진행하던 방식이 아닌 기기를 기울여 가며 진행하는 새로운 방식의 2048 게임 입니다.
 </br>
 
-  [tilt2048 배포 링크](https://testflight.apple.com/v1/invite/85cce260ab234696be6b6471996bd24d03205c96a04c4ff69bab276a2fb6d94b18342ec76?ct=4JUQZ8LWB6&advp=10000&platform=ios)
+  [tilt2048 배포 링크](https://testflight.apple.com/join/uJtnxcZV)
   
 </p>
 
